@@ -1,0 +1,23 @@
+{
+  "name": "js-accounts",
+  "version": "0.0.1",
+  "description": "account manager",
+  "scripts": {
+    "bulid": "sh ./build.sh",
+    "update": "pnpm update --recursive"
+  },
+  "dependencies": {
+    "mongodb": "6.3.0",
+    "typescript": "5.3.3",
+    "js-pure": "github:d3v-friends/js-pure",
+    "js-mongo": "github:d3v-friends/js-mongo"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.4",
+    "prettier": "3.1.1"
+  },
+  "engineStrict": true,
+  "engines": {
+    "node": "20.10.0"
+  }
+}
