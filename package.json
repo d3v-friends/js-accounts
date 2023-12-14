@@ -1,20 +1,27 @@
 {
   "name": "js-accounts",
   "version": "0.0.1",
+  "main": "./index.ts",
   "description": "account manager",
   "scripts": {
     "bulid": "sh ./build.sh",
     "update": "pnpm update --recursive"
   },
   "dependencies": {
-    "mongodb": "6.3.0",
-    "typescript": "5.3.3",
-    "js-pure": "github:d3v-friends/js-pure",
-    "js-mongo": "github:d3v-friends/js-mongo"
+    "mongodb": "^6.3.0",
+    "typescript": "^5.3.3",
+    "@d3v-friends/js-pure": "github:d3v-friends/js-pure",
+    "@d3v-friends/js-mongo": "github:d3v-friends/js-mongo"
   },
   "devDependencies": {
-    "@types/node": "20.10.4",
-    "prettier": "3.1.1"
+    "@types/node": "^20.10.4",
+    "prettier": "^3.1.1",
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
+  },
+  "exports": {
+    "default": "./index.ts"
   },
   "engineStrict": true,
   "engines": {

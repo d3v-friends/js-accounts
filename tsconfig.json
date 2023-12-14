@@ -1,35 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es6",
     "lib": [
+      "ES6",
       "ES5",
-      "ES6"
+      "ESNext"
     ],
-    "module": "commonjs",
+    "module": "ES6",
+    "moduleResolution": "node",
     "baseUrl": ".",
-    "paths": {
-      "@js-accounts/*": [
-        "./ts/*",
-        "./esm/*",
-        "./cjs/*"
-      ]
-    },
     "allowJs": true,
     "checkJs": false,
-    "inlineSourceMap": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "alwaysStrict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": [
-    "./ts/**/*.ts"
+    "./**/*.ts"
   ],
   "exclude": [
-    "/node_modules"
+    "./node_modules",
+    "./dist",
   ]
 }
