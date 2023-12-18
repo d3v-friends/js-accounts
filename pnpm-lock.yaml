@@ -7,10 +7,10 @@ settings:
 dependencies:
   '@js-mongo':
     specifier: github:d3v-friends/js-mongo
-    version: github.com/d3v-friends/js-mongo/dc8ca1b5f2fe46c92a98de76a3b1507f35720929
+    version: github.com/d3v-friends/js-mongo/dab83aa48e50d190b6b6edc7c1a3eede41163d3c
   '@js-pure':
     specifier: github:d3v-friends/js-pure
-    version: github.com/d3v-friends/js-pure/25bc1f7d1042afdd556b35cd22825bcec286a3d1
+    version: github.com/d3v-friends/js-pure/2a4458ea764cad52ff925d246a8cc37177cf5727
   jsonwebtoken:
     specifier: 9.0.2
     version: 9.0.2
@@ -37,11 +37,11 @@ packages:
   /@types/jsonwebtoken@9.0.5:
     resolution: {integrity: sha512-VRLSGzik+Unrup6BsouBeHsf4d1hOEgYWTm/7Nmw1sXoN1+tRly/Gy/po3yeahnP4jfnQWWAhQAqcNfH7ngOkA==}
     dependencies:
-      '@types/node': 20.10.4
+      '@types/node': 20.10.5
     dev: true
 
-  /@types/node@20.10.4:
-    resolution: {integrity: sha512-D08YG6rr8X90YB56tSIuBaddy/UXAA9RKJoFvrsnogAum/0pmjkgi4+2nx96A330FmioegBWmEYQ+syqCFaveg==}
+  /@types/node@20.10.5:
+    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -241,13 +241,13 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: false
 
-  github.com/d3v-friends/js-mongo/dc8ca1b5f2fe46c92a98de76a3b1507f35720929:
-    resolution: {tarball: https://codeload.github.com/d3v-friends/js-mongo/tar.gz/dc8ca1b5f2fe46c92a98de76a3b1507f35720929}
+  github.com/d3v-friends/js-mongo/dab83aa48e50d190b6b6edc7c1a3eede41163d3c:
+    resolution: {tarball: https://codeload.github.com/d3v-friends/js-mongo/tar.gz/dab83aa48e50d190b6b6edc7c1a3eede41163d3c}
     name: '@d3v-friends/js-mongo'
     version: 0.0.1
     engines: {node: 20.10.0}
     dependencies:
-      '@js-pure': github.com/d3v-friends/js-pure/25bc1f7d1042afdd556b35cd22825bcec286a3d1
+      '@js-pure': github.com/d3v-friends/js-pure/2a4458ea764cad52ff925d246a8cc37177cf5727
       mongodb: 6.3.0
       typescript: 5.3.3
     transitivePeerDependencies:
@@ -260,8 +260,8 @@ packages:
       - socks
     dev: false
 
-  github.com/d3v-friends/js-pure/25bc1f7d1042afdd556b35cd22825bcec286a3d1:
-    resolution: {tarball: https://codeload.github.com/d3v-friends/js-pure/tar.gz/25bc1f7d1042afdd556b35cd22825bcec286a3d1}
+  github.com/d3v-friends/js-pure/2a4458ea764cad52ff925d246a8cc37177cf5727:
+    resolution: {tarball: https://codeload.github.com/d3v-friends/js-pure/tar.gz/2a4458ea764cad52ff925d246a8cc37177cf5727}
     name: '@d3v-friends/js-pure'
     version: 0.0.1
     engines: {node: 20.10.0}

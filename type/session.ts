@@ -1,4 +1,4 @@
-import { DateQuery } from "@js-mongo/ts/type";
+import { DateQuery } from "@js-mongo/type";
 import { ObjectId } from "mongodb";
 
 export type Data = {

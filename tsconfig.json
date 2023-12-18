@@ -24,23 +24,25 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     // paths
-    "rootDir": "./ts",
+    "rootDir": ".",
     "paths": {
       "@src/*": [
-        "./ts/*"
+        "./*"
       ],
-      "@src": [
-        "./ts/index.ts"
+      "@doc/*": [
+        "./doc/*"
+      ],
+      "@env/*": [
+        "./env/*"
+      ],
+      "@type/*": [
+        "./type/*"
       ]
     }
   },
   "include": [
-    "./ts",
-    "./test"
   ],
   "exclude": [
-    "./node_modules",
-    "./cjs",
-    "./mjs"
+    "./node_modules"
   ]
 }

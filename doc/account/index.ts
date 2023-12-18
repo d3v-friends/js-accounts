@@ -1,9 +1,10 @@
-import { Schema } from "@js-mongo";
-import Env from "@src/env";
-import { AccountType } from "@src/type";
+import { Schema } from "@js-mongo/type";
+import { AccountType } from "@type/index";
 import { Collection, Db, ObjectId } from "mongodb";
+import { Env } from "@env/";
 
 const colNm = "accounts";
+
 const fn = {
     col: (db: Db): Collection<AccountType.Data> => db.collection(colNm),
     upsertIndex: async (db: Db, {}): Promise<void> => {
@@ -23,7 +24,21 @@ const fn = {
 
         await fn.col(db).insertOne(account);
         return account;
+
     },
+    update: async (
+        db: Db,
+        f: AccountType.FindArgs,
+        v: Partial<{
+            update: AccountType.UpdateArgs,
+            replace: AccountType.ReplaceArgs,
+        }>) => {
+
+        throw new Error("not impl");
+    },
+    index: () => {
+    },
+
 };
 
 const doc: Schema<AccountType.Data> & typeof fn = {

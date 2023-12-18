@@ -1,7 +1,7 @@
-import { Schema } from "@js-mongo";
+import { Schema } from "@js-mongo/type";
 import { fnErr } from "@js-pure";
-import { Nullable } from "@js-pure/ts/type";
-import Env from "@src/env";
+import { Nullable } from "@js-pure/type";
+import { Env } from "@src/env";
 import jwt from "jsonwebtoken";
 import { SessionType as Typ, AccountType } from "@src/type";
 import { Collection, Db, ObjectId } from "mongodb";
@@ -30,14 +30,14 @@ const fn = {
     verify: async (db: Db, { token, ip, userAgent }: Typ.VerifyArgs): Promise<AccountType.Data> => {
         const payload = fnJwt.verify(token);
         if (!payload) {
-            throw new fnErr.Error(fnErr.msg("invalid session token"), {
+            throw new fnErr.Error(fnErr.getMsg("invalid session token"), {
                 ko: "세션이 만료되었습니다. 다시 로그인 하여 주십시오.",
             });
         }
 
         if (Env.checkIp()) {
             if (payload.ip !== ip) {
-                throw new fnErr.Error(fnErr.msg("changed ip", {
+                throw new fnErr.Error(fnErr.getMsg("changed ip", {
                     origin: payload.ip,
                     received: ip,
                 }), {
@@ -48,7 +48,7 @@ const fn = {
 
         if (Env.checkUserAgent()) {
             if (payload.userAgent !== userAgent) {
-                throw new fnErr.Error(fnErr.msg("changed userAgent", {
+                throw new fnErr.Error(fnErr.getMsg("changed userAgent", {
                     origin: payload.userAgent,
                     received: userAgent,
                 }), {
@@ -58,7 +58,7 @@ const fn = {
         }
 
         if (!ObjectId.isValid(payload.sessionId)) {
-            throw new fnErr.Error(fnErr.msg(`invalid sessionId: sessionId=${payload.sessionId}`), {
+            throw new fnErr.Error(fnErr.getMsg(`invalid sessionId: sessionId=${payload.sessionId}`), {
                 ko: "잘못된 로그인 정보 입니다. 다시 로그인 하여 주십시오.",
             });
         }
@@ -93,7 +93,7 @@ const fn = {
 
         const res = await cur.next();
         if (!res) {
-            throw new fnErr.Error(fnErr.msg("not found session"), {
+            throw new fnErr.Error(fnErr.getMsg("not found session"), {
                 ko: "로그인 정보가 없습니다. 다시 로그인 하여 주십시오.",
             });
         }
@@ -146,7 +146,7 @@ const fnJwt = {
             if (!res) throw new Error("fail decode token");
             return res;
         } catch (e) {
-            throw new fnErr.Error(fnErr.msg("invalid session token", {
+            throw new fnErr.Error(fnErr.getMsg("invalid session token", {
                 err: e,
             }), fnJwt.err.msg);
         }
@@ -157,28 +157,26 @@ const doc: Schema<Typ.Data> & typeof fn = {
     colNm,
     migrate: [
         async col => {
-            await col.createIndexes([
-                {
-                    key: {
-                        isActivate: 1,
-                    },
-                },
-                {
-                    key: {
-                        ip: 1,
-                    },
-                },
-                {
-                    key: {
-                        createdAt: -1,
-                    },
-                },
-                {
-                    key: {
-                        updatedAt: -1,
-                    },
-                },
-            ]);
+            await col.createIndex({
+                isActivate: 1,
+            }, {
+                name: "def_is_activate_1",
+            });
+            await col.createIndex({
+                ip: 1,
+            }, {
+                name: "def_ip_1",
+            });
+            await col.createIndex({
+                createdAt: -1,
+            }, {
+                name: "def_createdAt_-1",
+            });
+            await col.createIndex({
+                updatedAt: -1,
+            }, {
+                name: "def_updated_At_-1",
+            });
         },
     ],
     ...fn,
