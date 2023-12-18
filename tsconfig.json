@@ -1,23 +1,46 @@
 {
   "compilerOptions": {
     "lib": [
-      "ES6",
-      "ES5",
-      "ESNext"
+      "es5",
+      "es6"
     ],
-    "module": "ES6",
+    "target": "es5",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "baseUrl": ".",
     "allowJs": true,
     "checkJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+    "removeComments": true,
+    "declaration": true,
+    "outDir": "./cjs",
+    // type check
+    "strict": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    // paths
+    "rootDir": "./ts",
+    "paths": {
+      "@src/*": [
+        "./ts/*"
+      ],
+      "@src": [
+        "./ts/index.ts"
+      ]
+    }
   },
   "include": [
-    "./**/*.ts"
+    "./ts",
+    "./test"
   ],
   "exclude": [
     "./node_modules",
-    "./dist",
+    "./cjs",
+    "./mjs"
   ]
 }
