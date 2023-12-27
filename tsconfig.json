@@ -2,47 +2,47 @@
   "compilerOptions": {
     "lib": [
       "es5",
-      "es6"
+      "es6",
+      "esnext"
     ],
     "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "allowJs": true,
     "checkJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "inlineSourceMap": true,
-    "removeComments": true,
-    "declaration": true,
-    "outDir": "./cjs",
     // type check
     "strict": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    // paths
-    "rootDir": ".",
+    // path
+    "declaration": true,
+    "inlineSourceMap": true,
+    "rootDir": "./src",
     "paths": {
       "@src/*": [
-        "./*"
-      ],
-      "@doc/*": [
-        "./doc/*"
-      ],
-      "@env/*": [
-        "./env/*"
-      ],
-      "@type/*": [
-        "./type/*"
+        "./src/*"
       ]
     }
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "include": [
+    "src"
   ],
   "exclude": [
-    "./node_modules"
+    "node_modules",
+    "dist",
+    "etc",
+    "config"
   ]
 }
