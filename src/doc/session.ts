@@ -1,222 +1,168 @@
 import { Manager } from "@js-mongo";
-import { fnParam } from "@js-pure";
-import { Session } from "@src/type";
-import { Schema, Types } from "mongoose";
+import { JsError } from "@js-pure";
+import { fnEnvLoader, fnJwt } from "@src/func";
+import { Account } from "@src/type/account";
+import { CreateArgs, Payload, Session, Token, VerifyArgs } from "../type/session";
+import { Connection, Model, Schema, Types } from "mongoose";
 
-export class SessionManager extends Manager<Session> {
+export default class implements Manager<Session> {
     public readonly colNm: string;
     public readonly migrate = [];
-    public readonly schema = new Schema<Session.Data>({
-        accountId: {
-            type: Types.ObjectId,
-            required: true,
-            index: -1,
+    public readonly schema = new Schema<Session>(
+        {
+            accountId: {
+                type: Schema.Types.ObjectId,
+                required: true,
+                index: -1,
+            },
+            isActivate: {
+                type: Boolean,
+                required: true,
+            },
+            ip: {
+                type: String,
+                index: 1,
+            },
+            userAgent: {
+                type: String,
+                index: 1,
+            },
+            lastSignAt: {
+                type: Date,
+                required: true,
+                index: -1,
+            },
         },
-        isActivate: {
-            type: Boolean,
-            required: true,
-        },
-        property: {
-            type: Types.Map,
-        },
-        lastSignAt: {
-            type: Date,
-            required: true,
-            index: -1,
-        },
-    }, {
-        timestamps: true,
-    });
+        {
+            timestamps: true,
+        }
+    );
 
-    constructor(...colNms: string[]) {
-        super();
-        this.colNm = fnParam.string(colNms, "sessions");
+    constructor(colNm = "sessions") {
+        this.colNm = colNm;
+    }
+
+    public model(conn: Connection): Model<Session> {
+        return conn.model(this.colNm, this.schema);
+    }
+
+    public async create(model: Model<Session>, { accountId, ip, userAgent }: CreateArgs): Promise<Token> {
+        const now = new Date();
+        const session: Session = {
+            _id: new Types.ObjectId(),
+            accountId,
+            ip,
+            isActivate: true,
+            userAgent,
+            lastSignAt: now,
+            createdAt: now,
+            updatedAt: now,
+        };
+
+        await model.create(session);
+
+        return fnJwt.create<Payload>(
+            {
+                sessionId: session._id.toHexString(),
+                signAt: now.toISOString(),
+            },
+            fnEnvLoader.jwtSecret()
+        );
+    }
+
+    public async verify(model: Model<Session>, { token, ip, userAgent }: VerifyArgs): Promise<Account> {
+        const payload = fnJwt.verify<Payload>(token, fnEnvLoader.jwtSecret());
+        const sessionId = Types.ObjectId.createFromHexString(payload.sessionId);
+        if (!sessionId) {
+            throw new JsError(
+                "invalid sessionId",
+                { payload },
+                {
+                    ko: "로그인 실패. 다시 시도하여 주십시오.",
+                }
+            );
+        }
+
+        const res = await model.aggregate<Session & { account: Account }>([
+            {
+                $match: {
+                    _id: sessionId,
+                    isActivate: true,
+                },
+            },
+            {
+                $lookup: {
+                    as: "account",
+                    from: "accounts",
+                    localField: "accountId",
+                    foreignField: "_id",
+                },
+            },
+            {
+                $addFields: {
+                    account: {
+                        $arrayElemAt: ["$account", 0],
+                    },
+                },
+            },
+        ]);
+
+        if (res.length === 0) {
+            throw new JsError(
+                "not found session",
+                {
+                    payload,
+                },
+                {
+                    ko: "로그인 정보가 없습니다. 다시 시도하여 주십시오.",
+                }
+            );
+        }
+
+        const session = res[0];
+
+        if (fnEnvLoader.checkIp()) {
+            if (ip !== session.ip) {
+                throw new JsError(
+                    "invalid ip",
+                    {
+                        sessionIp: session.ip,
+                        connIp: ip,
+                    },
+                    {
+                        ko: "접속 IP가 변경 되었습니다. 다시 로그인 하여 주십시오.",
+                    }
+                );
+            }
+        }
+
+        if (fnEnvLoader.checkUserAgent()) {
+            if (userAgent !== session.userAgent) {
+                throw new JsError(
+                    "changed userAgent",
+                    {
+                        session: session.userAgent,
+                        conn: userAgent,
+                    },
+                    {
+                        ko: "접속 기기가 변경되었습니다. 다시 로그인 하여 주십시오.",
+                    }
+                );
+            }
+        }
+
+        await model.updateOne(
+            {
+                _id: sessionId,
+                isActivate: true,
+            },
+            {
+                $set: {
+                    lastSignAt: new Date(),
+                },
+            }
+        );
+
+        return session.account;
     }
 }
-
-// import { Schema } from "mongoose";
-// import { fnEnvLoader, fnJwt } from "../func";
-// import { Account, Session } from "../type";
-// import { Manager, FnMigrate } from "@js-mongo";
-// import { JsError, fnParam } from "@js-pure";
-// import { Db, ObjectId } from "mongodb";
-//
-//
-// export class SessionManager extends Manager<Session.Data> {
-//     public readonly colNm: string;
-//     public readonly schema = new Schema<Session.Data>({
-//
-//     });
-//     public readonly migrate: FnMigrate<Session.Data>[];
-//
-//     constructor(...colNms: string[]) {
-//         super();
-//         this.colNm = fnParam.string(colNms, "sessions");
-//         this.migrate = [
-//             async col => {
-//                 await col.createIndex({
-//                     isActivate: 1,
-//                 });
-//                 await col.createIndex({
-//                     ip: 1,
-//                 });
-//                 await col.createIndex({
-//                     createdAt: -1,
-//                 });
-//                 await col.createIndex({
-//                     updatedAt: -1,
-//                 });
-//             },
-//         ];
-//     }
-//
-//     public async create(db: Db, { accountId, ip, userAgent }: Session.CreateArgs): Promise<Session.Token> {
-//         const now = new Date();
-//         const v: Session.Data = {
-//             _id: new ObjectId(),
-//             accountId,
-//             isActivate: true,
-//             property: {
-//                 ip,
-//                 userAgent,
-//             },
-//             createdAt: now,
-//             lastSignAt: now,
-//         };
-//
-//
-//         await this.getCol(db).insertOne(v);
-//         return fnJwt.create<Session.Payload>(
-//             {
-//                 sessionId: v._id.toHexString(),
-//                 signAt: now.toISOString(),
-//                 userAgent,
-//             },
-//             fnEnvLoader.jwtSecret(),
-//         );
-//     }
-//
-//     public async verify(db: Db, { token, ip, userAgent }: Session.VerifyArgs): Promise<Account.Data> {
-//         const payload: Session.Payload = fnJwt.verify(token, fnEnvLoader.jwtSecret());
-//
-//         if (!ObjectId.isValid(payload.sessionId)) {
-//             throw new JsError(
-//                 `invalid sessionId`,
-//                 {},
-//                 {
-//                     ko: "잘못된 로그인 정보 입니다. 다시 로그인 하여 주십시오.",
-//                 });
-//         }
-//
-//         const sessionId = ObjectId.createFromHexString(payload.sessionId);
-//         const cur = this.getCol(db).aggregate<Session.Data & { account: Account.Data }>([
-//             {
-//                 $match: {
-//                     _id: sessionId,
-//                     isActivate: true,
-//                 },
-//             },
-//             {
-//                 $limit: 1,
-//             },
-//             {
-//                 $lookUp: {
-//                     from: "accounts",
-//                     as: "account",
-//                     foreignField: "_id",
-//                     localField: "accountId",
-//                 },
-//             },
-//             {
-//                 $addFields: {
-//                     account: {
-//                         $elemArrayAt: ["$$account", 0],
-//                     },
-//                 },
-//             },
-//         ]);
-//
-//         const res = await cur.next();
-//         if (!res) {
-//             throw new JsError(
-//                 "not found session",
-//                 {},
-//                 {
-//                     ko: "로그인 정보가 없습니다. 다시 로그인 하여 주십시오.",
-//                 });
-//         }
-//
-//         if (fnEnvLoader.checkIp()) {
-//
-//             if (ip !== res.property.ip) {
-//                 throw new JsError(
-//                     `unmatched userAgent`,
-//                     {
-//                         token: payload.userAgent,
-//                         server: userAgent,
-//                     },
-//                     {
-//                         ko: "접속 IP가 변경되었습니다. 다시 로그인 하여 주십시오.",
-//                     });
-//             }
-//         }
-//
-//
-//         if (fnEnvLoader.checkUserAgent()) {
-//             if (userAgent !== res.property.userAgent) {
-//                 throw new JsError(
-//                     `unmatched userAgent`,
-//                     {
-//                         token: payload.userAgent,
-//                         server: userAgent,
-//                     },
-//                     {
-//                         ko: "접속기기가 변경되었습니다. 다시 로그인 하여 주십시오.",
-//                     },
-//                 );
-//             }
-//         }
-//
-//
-//         await this.getCol(db).updateOne(
-//             {
-//                 _id: sessionId,
-//             },
-//             {
-//                 $set: {
-//                     lastSignAt: new Date(),
-//                 },
-//             });
-//
-//         return res.account;
-//     }
-//
-//     public async delete(db: Db, f: Session.FindArgs): Promise<void> {
-//         const filter = this.findArgs(f);
-//         await this.getCol(db).deleteOne(filter);
-//     }
-//
-//     private findArgs({ id, isActivate, lastSignAt, createdAt }: Session.FindArgs): object {
-//         const res: any = {};
-//         if (id) {
-//             res["_id"] = {
-//                 $in: id,
-//             };
-//         }
-//
-//         if (isActivate) {
-//             res["isActivate"] = isActivate === "true";
-//         }
-//
-//         if (lastSignAt) {
-//             res["lastSignAt"] = lastSignAt;
-//         }
-//
-//         if (createdAt) {
-//             res["createdAt"] = createdAt;
-//         }
-//
-//         return res;
-//     }
-//
-// }

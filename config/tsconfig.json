@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es5",
+    // path
+    "outDir": "../dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": [
+    "../src"
+  ],
+  "exclude": [
+    "../src/test",
+    "../node_modules",
+    "../dist",
+    "../config"
+  ]
+}

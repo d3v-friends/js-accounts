@@ -1,45 +1,45 @@
 import { Bool, DateQuery } from "@js-mongo";
 import { Types } from "mongoose";
 
-
-export interface Data {
+export interface Session {
     _id: Types.ObjectId;
     accountId: Types.ObjectId;
     isActivate: boolean;
-    property: SessionProperty;
+    ip: string;
+    userAgent: string;
     lastSignAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export type Token = string;
 
-export type SessionPropertyKey = "ip" | "userAgent" | string;
-export type SessionProperty = Record<SessionPropertyKey, string>
-
-export type FindArgs = Partial<{
-    id: Types.ObjectId[],
-    isActivate: Bool,
-    property: SessionProperty,
-    createdAt: DateQuery,
-    lastSignAt: DateQuery,
-}>
-
-export type CreateArgs = {
-    accountId: Types.ObjectId,
-    ip: string,
-    userAgent: string,
+export interface FindArgs {
+    id: Types.ObjectId[];
+    isActivate: Bool;
+    ip: string;
+    userAgent: string;
+    createdAt: DateQuery;
+    lastSignAt: DateQuery;
 }
 
-export type DeleteArgs = {
-    token: Token
+export interface CreateArgs {
+    accountId: Types.ObjectId;
+    ip: string;
+    userAgent: string;
 }
 
-export type VerifyArgs = {
+export interface DeleteArgs {
+    token: Token;
+}
+
+export interface VerifyArgs {
     token: Token;
     ip: string;
     userAgent: string;
 }
 
-export type Payload = {
+export interface Payload {
     sessionId: string;
     signAt: string;
     userAgent?: string;

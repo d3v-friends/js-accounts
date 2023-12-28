@@ -11,8 +11,7 @@
     "@js-pure": "github:d3v-friends/js-pure",
     "jsonwebtoken": "9.0.2",
     "mongoose": "8.0.3",
-    "otplib": "12.0.1",
-    "typescript": "5.3.3"
+    "otplib": "12.0.1"
   },
   "devDependencies": {
     "@faker-js/faker": "8.3.1",
@@ -24,17 +23,12 @@
     "prettier": "3.1.1",
     "ts-jest": "29.1.1",
     "ts-node": "10.9.2",
-    "tsc-alias": "1.8.8"
+    "typescript": "5.3.3"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
   "engines": {
-    "node": "^20.10.0"
-  },
-  "exports": {
-    ".": {
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/mjs/index.js",
-      "types": "./src/index.ts",
-      "default": "./dist/cjs/index.js"
-    }
+    "node": ">=20.10.0"
   }
 }

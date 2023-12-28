@@ -1,15 +1,14 @@
-import { fnMongo, Manager, Pager, ResultList } from "@js-mongo";
-import { fnParam, JsError } from "@js-pure";
-import { Connection, Error, Schema, Types } from "mongoose";
-import type { Account } from "@src/type";
+import { fnMongo, Manager, Pager, ResultList, MongooseIndex, FnMigrate } from "@js-mongo";
+import { JsError } from "@js-pure";
+import { Connection, Error, Model, Schema, Types } from "mongoose";
+import { Account, CreateArgs, FindArgs, IndexArgs, IndexName, SortArgs, UpdateArgs } from "../type/account";
 import { fnEnvLoader } from "../func";
 import { authenticator } from "otplib";
 
-
-export class AccountManager extends Manager<Account.Data> {
-    public readonly migrate = [];
+export default class implements Manager<Account> {
     public readonly colNm: string;
-    public readonly schema = new Schema<Account.Data>(
+    public readonly migrate: FnMigrate<Account>[] = [];
+    public readonly schema = new Schema<Account>(
         {
             isActivate: {
                 type: Boolean,
@@ -17,32 +16,31 @@ export class AccountManager extends Manager<Account.Data> {
                 index: 1,
             },
             identifier: {
-                type: Types.Map,
+                type: Schema.Types.Mixed,
             },
             property: {
-                type: Types.Map,
+                type: Schema.Types.Mixed,
             },
             verifier: {
-                type: Types.Map,
+                type: Schema.Types.Mixed,
             },
         },
         {
             timestamps: true,
-        },
+        }
     );
 
-    constructor(...colNms: string[]) {
-        super();
-        this.colNm = fnParam.string(colNms, "accounts");
+    constructor(colNm = "accounts") {
+        this.colNm = colNm;
     }
 
-    public async create(conn: Connection, {
-        identifier,
-        property,
-        verifier,
-    }: Account.CreateArgs): Promise<Account.Data> {
+    public model(conn: Connection): Model<Account> {
+        return conn.model(this.colNm, this.schema);
+    }
+
+    public async create(model: Model<Account>, { identifier, property, verifier }: CreateArgs): Promise<Account> {
         const now = new Date();
-        const account: Account.Data = {
+        const account: Account = {
             _id: new Types.ObjectId(),
             isActivate: fnEnvLoader.signUpActivate(),
             identifier,
@@ -51,55 +49,51 @@ export class AccountManager extends Manager<Account.Data> {
             createdAt: now,
             updatedAt: now,
         };
-        await this.model(conn).create(account);
+        await model.create(account);
         return account;
     }
 
-    public async updateOne(conn: Connection, f: Account.FindArgs, u: Account.UpdateArgs): Promise<Account.Data> {
+    public async updateOne(model: Model<Account>, f: FindArgs, u: Partial<UpdateArgs>): Promise<Account> {
         const filter = this.getFindArgs(f);
         const update = this.getUpdateArgs(u);
-        await this.model(conn).updateOne(filter, update);
-        return this.findOne(conn, f);
+        await model.updateOne(filter, update);
+        return this.findOne(model, f);
     }
 
-    public async updateMany(conn: Connection, f: Account.FindArgs, u: Account.UpdateArgs): Promise<Account.Data[]> {
+    public async updateMany(model: Model<Account>, f: FindArgs, u: Partial<UpdateArgs>): Promise<Account[]> {
         const filter = this.getFindArgs(f);
         const update = this.getUpdateArgs(u);
-        await this.model(conn).updateMany(filter, update);
-        return this.findAll(conn, f);
+        await model.updateMany(filter, update);
+        return this.findAll(model, f);
     }
 
-    public async findOne(conn: Connection, f: Account.FindArgs, ...sorts: Account.SortArgs[]): Promise<Account.Data> {
+    public async findOne(model: Model<Account>, f: FindArgs, ...sorts: SortArgs[]): Promise<Account> {
         const filter = this.getFindArgs(f);
         const sort = this.getSortArgs(sorts);
-        return fnMongo.findOne(this.model(conn), filter, sort);
+        return fnMongo.findOne(model, filter, sort);
     }
 
-    public async findAll(conn: Connection, f: Account.FindArgs, ...sorts: Account.SortArgs[]): Promise<Account.Data[]> {
+    public async findAll(model: Model<Account>, f: FindArgs, ...sorts: SortArgs[]): Promise<Account[]> {
         const filter = this.getFindArgs(f);
         const sort = this.getSortArgs(sorts);
-        return fnMongo.findAll(this.model(conn), filter, sort);
+        return fnMongo.findAll(model, filter, sort);
     }
 
-    public async findList(conn: Connection, f: Account.FindArgs, p: Pager, ...sorts: Account.SortArgs[]): Promise<ResultList<Account.Data>> {
+    public async findList(model: Model<Account>, f: FindArgs, p: Pager, ...sorts: SortArgs[]): Promise<ResultList<Account>> {
         const filter = this.getFindArgs(f);
         const sort = this.getSortArgs(sorts);
-        return fnMongo.findList(this.model(conn), filter, p, sort);
+        return fnMongo.findList(model, filter, p, sort);
     }
 
-    public async index(conn: Connection, { identifier, property }: Account.IndexArgs): Promise<void> {
-        const col = this.model(conn);
-        throw new Error("not impl");
-    }
-
-    public verify(data: Account.Data, key: string, token: string): boolean {
+    public verify(data: Account, key: string, token: string): boolean {
         if (!data.verifier.hasOwnProperty(key)) {
             throw new JsError(
                 "not found verifier",
                 { key },
                 {
                     ko: "서버에러! 관리자에게 문의하여 주십시오.",
-                });
+                }
+            );
         }
         const verifier = data.verifier[key];
 
@@ -116,13 +110,65 @@ export class AccountManager extends Manager<Account.Data> {
                     "invalid verify mode",
                     {
                         mode: verifier.mode,
-                    }, {
+                    },
+                    {
                         ko: "서버에러! 관리자에게 문의하여 주십시오.",
-                    });
+                    }
+                );
         }
     }
 
-    private getUpdateArgs({ isActivate, identifier, property, verifier }: Account.UpdateArgs): object {
+    public async reindex(conn: Connection, { identifier, property }: Partial<IndexArgs>): Promise<void> {
+        this.schema.clearIndexes();
+        await conn.model(this.colNm, this.schema).syncIndexes();
+
+        this.schema.index({ isActivate: 1 });
+        if (identifier) {
+            for (const key of identifier) {
+                const field: any = {
+                    [`identifier.${key}`]: 1,
+                };
+                this.schema.index(field, { unique: true });
+            }
+        }
+
+        if (property) {
+            for (const key of property) {
+                const field: any = {
+                    [`property.${key}`]: 1,
+                };
+                this.schema.index(field, { unique: true });
+            }
+        }
+
+        await conn.model(this.colNm, this.schema).syncIndexes();
+    }
+
+    public async getIndexList(model: Model<Account>): Promise<IndexName> {
+        const ls = (await model.listIndexes()) as MongooseIndex[];
+        const res: IndexName = {
+            identifier: [],
+            property: [],
+            other: [],
+        };
+        for (const idx of ls) {
+            if (idx.name.startsWith("identifier")) {
+                res.identifier.push(idx.name);
+                continue;
+            }
+
+            if (idx.name.startsWith("property")) {
+                res.property.push(idx.name);
+                continue;
+            }
+
+            res.other.push(idx.name);
+        }
+
+        return res;
+    }
+
+    private getUpdateArgs({ isActivate, identifier, property, verifier }: Partial<UpdateArgs>): object {
         const set: any = {
             updatedAt: new Date(),
         };
@@ -154,7 +200,7 @@ export class AccountManager extends Manager<Account.Data> {
         };
     }
 
-    private getFindArgs({ id, identifier, property, createdAt, updatedAt, query }: Account.FindArgs): object {
+    private getFindArgs({ id, identifier, property, createdAt, updatedAt }: Partial<FindArgs>): object {
         let res: any = {};
         if (id) {
             res["_id"] = {
@@ -182,17 +228,10 @@ export class AccountManager extends Manager<Account.Data> {
             res["updatedAt"] = updatedAt;
         }
 
-        if (query) {
-            res = {
-                ...res,
-                ...query,
-            };
-        }
-
         return res;
     }
 
-    private getSortArgs(sorts: Account.SortArgs[]): object {
+    private getSortArgs(sorts: SortArgs[]): object {
         if (sorts.length === 0) return {};
         const { id, identifier, property, createdAt, updatedAt } = sorts[0];
         const res: any = {};
@@ -222,5 +261,4 @@ export class AccountManager extends Manager<Account.Data> {
 
         return res;
     }
-
 }

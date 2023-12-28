@@ -1,7 +1,7 @@
-import type { DateQuery, Bool } from "@js-mongo";
+import { DateQuery, Bool } from "@js-mongo";
 import { IndexDirection, Types } from "mongoose";
 
-export interface Data {
+export interface Account {
     _id: Types.ObjectId;
     isActivate: boolean;
     identifier: { [key: string]: string };
@@ -52,7 +52,13 @@ export type SortArgs = Partial<{
 }>
 
 
-export type IndexArgs = {
+export interface IndexArgs {
     identifier: string[],
     property: string[],
+}
+
+export interface IndexName {
+    identifier: string[],
+    property: string[],
+    other: string[],
 }

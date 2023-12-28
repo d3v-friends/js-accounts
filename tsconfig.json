@@ -5,7 +5,6 @@
       "es6",
       "esnext"
     ],
-    "target": "es5",
     "module": "esnext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
@@ -22,18 +21,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     // path
-    "declaration": true,
-    "inlineSourceMap": true,
-    "rootDir": "./src",
+    "rootDir": "src",
+    "baseUrl": ".",
     "paths": {
       "@src/*": [
-        "./src/*"
+        "src/*"
       ]
-    }
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
     }
   },
   "include": [
@@ -42,7 +35,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "etc",
     "config"
   ]
 }

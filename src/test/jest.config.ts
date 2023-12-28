@@ -7,7 +7,7 @@ const config: JestConfigWithTsJest = {
     testRegex: "^.+[ts|js|tsx|jsx]$",
     transform: {},
     moduleNameMapper: {
-        "^@src/(.*)$": path.resolve("<rootDir>", "..",  "$1"),
+        "^@src/(.*)$": path.resolve("<rootDir>", "..", "..", "$1"),
     },
 };
 
