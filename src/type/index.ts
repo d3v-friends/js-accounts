@@ -1,2 +1,3 @@
-export type * as Account from "./account";
-export type * as Session from "./session";
+export * from "./uuid";
+
+type Bool = "true" | "false";

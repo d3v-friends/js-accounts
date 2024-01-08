@@ -1,3 +1,2 @@
-export * from "./doc";
 export * from "./type";
-export { fnJwt } from "./func";
+export * as ORM from "./sequalize";
