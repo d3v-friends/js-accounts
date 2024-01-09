@@ -1,7 +1,7 @@
-import { UUID } from "@src/type";
+import { UUID, VerifierMode } from "@src/type";
 import { Model, Optional, DataTypes, Sequelize } from "sequelize";
 
-type VerifierAttribute = {
+export type VerifierAttribute = {
     id: UUID;
     accountId: UUID;
     kind: string;
@@ -12,12 +12,9 @@ type VerifierAttribute = {
     updatedAt: Date;
 }
 
-export type VerifierMode = "COMPARE" | "OTP";
-
 type VerifierCreateAttribute = Optional<VerifierAttribute, "id">;
 
-
-class Verifier extends Model<VerifierAttribute, VerifierCreateAttribute> {
+export class Verifier extends Model<VerifierAttribute, VerifierCreateAttribute> {
     declare id: UUID;
     declare accountId: UUID;
     declare kind: string;

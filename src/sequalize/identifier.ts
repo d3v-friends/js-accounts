@@ -1,7 +1,8 @@
+import { Account } from "@src/sequalize/account";
 import { UUID } from "@src/type";
 import { Model, Optional, DataTypes, Sequelize } from "sequelize";
 
-type IdentifierAttribute = {
+export type IdentifierAttribute = {
     id: UUID;
     accountId: UUID;
     kind: string;
@@ -12,7 +13,7 @@ type IdentifierAttribute = {
 type IdentifierCreateAttribute = Optional<IdentifierAttribute, "id">;
 
 
-class Identifier extends Model<IdentifierAttribute, IdentifierCreateAttribute> {
+export class Identifier extends Model<IdentifierAttribute, IdentifierCreateAttribute> {
     declare id: UUID;
     declare accountId: UUID;
     declare kind: string;

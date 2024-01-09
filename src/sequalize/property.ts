@@ -1,7 +1,7 @@
 import { UUID } from "@src/type";
 import { Model, Optional, DataTypes, Sequelize } from "sequelize";
 
-type PropertyAttribute = {
+export type PropertyAttribute = {
     id: UUID;
     accountId: UUID;
     key: string;
@@ -13,7 +13,7 @@ type PropertyAttribute = {
 type PropertyCreateAttribute = Optional<PropertyAttribute, "id">;
 
 
-class Property extends Model<PropertyAttribute, PropertyCreateAttribute> {
+export class Property extends Model<PropertyAttribute, PropertyCreateAttribute> {
     declare id: UUID;
     declare accountId: UUID;
     declare key: string;
